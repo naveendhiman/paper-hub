@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIT PaperHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0f1117; --paper:#fafaf8; --cream:#f5f2ec; --blue:#2563eb;
+  --blue-light:#dbeafe; --green:#059669; --green-light:#d1fae5;
+  --red:#dc2626; --red-light:#fee2e2; --amber:#d97706; --amber-light:#fef3c7;
+  --border:#e5e2da; --muted:#6b7280;
+  --shadow:0 4px 24px rgba(15,17,23,0.08); --shadow-lg:0 12px 48px rgba(15,17,23,0.14);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;}
+
+/* NAVBAR */
+.navbar{position:sticky;top:0;z-index:100;background:rgba(250,250,248,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5%;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.brand{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;}
+.brand .dot{color:var(--blue);}
+.nav-right{display:flex;gap:10px;align-items:center;}
+.tabs{display:flex;gap:4px;background:var(--cream);border-radius:10px;padding:4px;}
+.tab{padding:7px 16px;border-radius:7px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;transition:all .15s;color:var(--muted);}
+.tab.active{background:white;color:var(--ink);box-shadow:0 1px 6px rgba(0,0,0,.08);}
+.chip{display:inline-block;background:var(--blue);color:white;border-radius:10px;padding:1px 7px;font-size:.7rem;margin-left:4px;}
+
+/* BUTTONS */
+.btn{padding:9px 20px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:var(--ink);color:white;} .btn-primary:hover{background:#1e2433;transform:translateY(-1px);}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--ink);} .btn-outline:hover{border-color:var(--ink);background:var(--cream);}
+.btn-ghost{background:transparent;color:var(--muted);padding:9px 14px;} .btn-ghost:hover{color:var(--ink);background:var(--cream);}
+.btn-blue{background:var(--blue);color:white;} .btn-blue:hover{background:#1d4ed8;}
+.btn-green{background:var(--green);color:white;} .btn-green:hover{background:#047857;}
+.btn-red{background:var(--red);color:white;} .btn-red:hover{background:#b91c1c;}
+.btn-sm{padding:6px 14px;font-size:.8rem;}
+.btn-full{width:100%;justify-content:center;}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+
+/* PAGES */
+.page{display:none;} .page.active{display:block;}
+
+/* SECTION */
+.section{padding:48px 5%;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+.section-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;}
+
+/* BADGE */
+.badge{padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:500;background:white;border:1.5px solid var(--border);color:var(--muted);}
+.badge-blue{background:var(--blue-light);border-color:#93c5fd;color:var(--blue);}
+
+/* BACK BTN */
+.back-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;background:white;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;color:var(--ink);transition:all .18s;margin-bottom:24px;}
+.back-btn:hover{border-color:#9ca3af;transform:translateX(-2px);}
+
+/* SEM HERO */
+.sem-hero-block{background:linear-gradient(135deg,#0f1117 0%,#1e2d6b 100%);border-radius:18px;padding:36px 44px;color:white;position:relative;overflow:hidden;margin-bottom:24px;}
+.sem-hero-block::before{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;background:radial-gradient(circle,rgba(78,115,223,.35),transparent 70%);border-radius:50%;}
+.sem-hero-block::after{content:'';position:absolute;bottom:-30px;left:25%;width:160px;height:160px;background:radial-gradient(circle,rgba(245,158,11,.2),transparent 70%);border-radius:50%;}
+.sem-badge-pill{display:inline-block;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.5);color:#fcd34d;padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.sem-hero-block h2{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:700;margin-bottom:6px;position:relative;z-index:1;}
+.sem-hero-block p{color:rgba(255,255,255,.65);font-size:.9rem;position:relative;z-index:1;}
+.sem-hero-stats{display:flex;gap:24px;margin-top:18px;flex-wrap:wrap;position:relative;z-index:1;}
+.sem-stat-num{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#fcd34d;line-height:1;}
+.sem-stat-label{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:2px;}
+
+/* SGPI */
+.sgpi-strip{background:linear-gradient(90deg,#f59e0b,#d97706);color:white;border-radius:12px;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px;}
+.sgpi-left{display:flex;align-items:center;gap:10px;}
+.sgpi-text{font-weight:600;font-size:.88rem;}
+.sgpi-sub{font-size:.75rem;opacity:.85;}
+.sgpi-score{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;}
+
+/* SEM TABS */
+.sem-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.sem-tab{padding:8px 20px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;color:var(--muted);transition:all .18s;}
+.sem-tab:hover{border-color:#93c5fd;color:var(--blue);}
+.sem-tab.active{background:var(--blue);color:white;border-color:var(--blue);}
+.sem-tab .s-count{display:inline-block;background:rgba(255,255,255,.25);border-radius:10px;padding:1px 7px;font-size:.72rem;margin-left:5px;}
+.sem-tab:not(.active) .s-count{background:var(--blue-light);color:var(--blue);}
+
+/* SUBJECT CARDS */
+.subject-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;}
+.subj-card{background:white;border-radius:12px;border:1.5px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:14px;transition:all .18s;box-shadow:0 2px 6px rgba(0,0,0,.04);cursor:pointer;position:relative;overflow:hidden;animation:subjIn .3s ease both;}
+.subj-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);border-radius:3px 0 0 3px;transform:scaleY(0);transition:transform .2s;}
+.subj-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.09);border-color:#c7d2fe;}
+.subj-card:hover::before{transform:scaleY(1);}
+.subj-card.is-lab::before{background:#059669;} .subj-card.is-lab:hover{border-color:#a7f3d0;}
+.subj-card.is-activity::before{background:var(--amber);}
+.subj-num{width:36px;height:36px;border-radius:9px;background:var(--blue-light);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;flex-shrink:0;font-family:'Playfair Display',serif;}
+.subj-card.is-lab .subj-num{background:#d1fae5;color:#065f46;}
+.subj-card.is-activity .subj-num{background:#fef3c7;color:#92400e;}
+.subj-name{font-weight:600;font-size:.88rem;color:var(--ink);line-height:1.3;}
+.subj-tag{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:600;}
+.t-theory{background:var(--blue-light);color:var(--blue);}
+.t-lab{background:#d1fae5;color:#065f46;}
+.t-activity{background:#fef3c7;color:#92400e;}
+@keyframes subjIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* PAPERS PAGE */
+.papers-header{background:linear-gradient(135deg,#0f1117,#1e2d6b);border-radius:16px;padding:28px 36px;color:white;margin-bottom:24px;position:relative;overflow:hidden;}
+.papers-header::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(78,115,223,.3),transparent 70%);border-radius:50%;}
+.papers-subject-name{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;margin-bottom:6px;position:relative;z-index:1;}
+.papers-meta{color:rgba(255,255,255,.65);font-size:.85rem;display:flex;gap:16px;flex-wrap:wrap;position:relative;z-index:1;}
+
+/* UPLOAD ZONE */
+.inline-upload{background:white;border:2px dashed var(--border);border-radius:14px;padding:28px;margin-bottom:24px;text-align:center;transition:all .2s;cursor:pointer;}
+.inline-upload.drag{border-color:var(--blue);background:var(--blue-light);}
+.inline-upload:hover{border-color:#93c5fd;}
+.inline-upload h3{font-size:.95rem;margin-bottom:4px;}
+.inline-upload p{color:var(--muted);font-size:.82rem;margin-bottom:14px;}
+.preview-wrap{display:flex;align-items:center;gap:14px;background:var(--cream);border-radius:10px;padding:12px 16px;margin:14px 0;text-align:left;}
+.preview-wrap img{width:60px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0;}
+.inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-top:14px;}
+.form-label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px;}
+.form-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;background:white;color:var(--ink);outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--blue);}
+.inline-progress{height:3px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden;}
+/* AI SCAN */
+.ai-scanning { position:relative; }
+.ai-scanning::after { content:'🤖 AI Scanning…'; position:absolute; inset:0; background:rgba(99,102,241,.85); color:white; font-weight:600; font-size:.9rem; display:flex; align-items:center; justify-content:center; border-radius:8px; animation:aiPulse 1s ease-in-out infinite; }
+@keyframes aiPulse { 0%,100%{opacity:.8} 50%{opacity:1} }
+.inline-progress-fill { transition: width .4s ease, background .3s; }
+
+/* PAPERS GRID */
+.papers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+.paper-card{background:white;border-radius:12px;border:1.5px solid var(--border);overflow:hidden;box-shadow:var(--shadow);transition:all .2s;}
+.paper-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.paper-img{position:relative;}
+.paper-img img{width:100%;height:155px;object-fit:cover;display:block;}
+.pending-overlay{position:absolute;inset:0;background:rgba(15,17,23,.5);display:flex;align-items:center;justify-content:center;}
+.paper-body{padding:14px;}
+.paper-title{font-weight:600;font-size:.88rem;margin-bottom:3px;line-height:1.3;}
+.paper-sub{color:var(--muted);font-size:.76rem;margin-bottom:10px;}
+.paper-actions{display:flex;gap:7px;flex-wrap:wrap;}
+
+/* STATUS */
+.status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.status-pending{background:var(--amber-light);color:var(--amber);}
+.status-approved{background:var(--green-light);color:var(--green);}
+.status-rejected{background:var(--red-light);color:var(--red);}
+
+/* MY UPLOADS */
+.my-item{display:flex;gap:16px;padding:16px;background:white;border:1.5px solid var(--border);border-radius:12px;margin-bottom:12px;align-items:center;}
+.my-thumb{width:72px;height:72px;border-radius:8px;object-fit:cover;flex-shrink:0;cursor:pointer;}
+.my-info{flex:1;}
+.my-title{font-weight:600;font-size:.9rem;margin-bottom:2px;}
+.my-time{color:var(--muted);font-size:.77rem;}
+
+/* ADMIN */
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.stat-card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
+.stat-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;line-height:1;}
+.stat-label{color:var(--muted);font-size:.8rem;margin-top:4px;}
+.pending-item{background:white;border:1.5px solid var(--border);border-radius:14px;display:flex;overflow:hidden;margin-bottom:16px;transition:box-shadow .2s;}
+.pending-item:hover{box-shadow:var(--shadow);}
+.pending-thumb{width:140px;min-width:140px;object-fit:cover;}
+.pending-body{padding:18px 20px;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+.pending-title{font-weight:600;margin-bottom:3px;}
+.pending-meta{font-size:.78rem;color:var(--muted);margin-bottom:8px;}
+.pending-actions{display:flex;gap:8px;align-items:center;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(15,17,23,.5);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:white;border-radius:20px;padding:36px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);animation:modalIn .25s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:6px;}
+.modal-sub{color:var(--muted);font-size:.88rem;margin-bottom:24px;}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.lightbox img{max-width:90vw;max-height:82vh;border-radius:8px;object-fit:contain;}
+.lb-close{position:absolute;top:20px;right:24px;background:rgba(255,255,255,.15);border:none;color:white;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;}
+.lb-info{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));padding:24px;color:white;text-align:center;}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--ink);color:white;padding:12px 18px;border-radius:10px;font-size:.875rem;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.25);animation:toastIn .25s ease;max-width:320px;}
+.toast-success{background:#064e3b;border-left:3px solid var(--green);}
+.toast-error{background:#7f1d1d;border-left:3px solid var(--red);}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--muted);border:2px dashed var(--border);border-radius:14px;}
+.empty-icon{font-size:2.5rem;display:block;margin-bottom:10px;}
+
+@media(max-width:768px){
+  .dash-stats{grid-template-columns:1fr 1fr;}
+  .pending-item{flex-direction:column;}
+  .pending-thumb{width:100%;height:150px;}
+  .navbar{padding:0 4%;}
+  .tab{padding:7px 10px;font-size:.8rem;}
+  .inline-form{grid-template-columns:1fr;}
+  .sem-hero-block{padding:24px 22px;}
+  .papers-header{padding:22px 20px;}
+}
+@media(max-width:480px){
+  .brand .brand-text{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="brand">📄 NIT<span class="dot">·</span><span class="brand-text">PaperHub</span></div>
+  <div class="nav-right">
+    <div class="tabs" id="studentTabs">
+      <button class="tab active" onclick="showPage('subjects')">📚 Subjects</button>
+      <button class="tab" onclick="showPage('myuploads')">My Uploads</button>
+    </div>
+    <div class="tabs" id="adminTabs" style="display:none">
+      <button class="tab active" onclick="showPage('subjects')">📚 Subjects</button>
+      <button class="tab" onclick="showPage('admin')">Dashboard <span class="chip" id="pendingChip">0</span></button>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="loginBtn" onclick="openLogin()">CR Login</button>
+    <button class="btn btn-ghost btn-sm" id="logoutBtn" onclick="doLogout()" style="display:none">Sign Out</button>
+    <button class="btn btn-outline btn-sm" id="aiSetupBtn" onclick="showApiKeyModal()" title="Configure AI verification" style="gap:6px;padding:7px 12px;display:none;">
+      <span id="aiStatusDot" style="width:8px;height:8px;border-radius:50%;background:#d97706;display:inline-block;flex-shrink:0"></span>
+      <span id="aiStatusLabel" style="font-size:.78rem;color:#d97706">AI Setup</span>
+    </button>
+  </div>
+</header>
+
+<!-- PAGE: SUBJECTS (HOME) -->
+<div id="page-subjects" class="page active">
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Chemical Engineering Papers</h2>
+      <span class="badge badge-blue">CH Branch</span>
+    </div>
+    <div class="sem-tabs" id="semTabs"></div>
+    <div class="subject-grid" id="subjectGrid"></div>
+  </section>
+</div>
+
+<!-- PAGE: SUBJECT PAPERS (DRILL DOWN) -->
+<div id="page-papers" class="page">
+  <section class="section">
+    <button class="back-btn" onclick="showPage('subjects')">← Back to Subjects</button>
+    <div id="papersHeader"></div>
+    <div id="papersUploadZone"></div>
+    <div id="papersGallery"></div>
+  </section>
+</div>
+
+<!-- PAGE: MY UPLOADS -->
+<div id="page-myuploads" class="page">
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">My Uploads</h2>
+    </div>
+    <div id="myUploadsList"></div>
+  </section>
+</div>
+
+<!-- PAGE: ADMIN DASHBOARD -->
+<div id="page-admin" class="page">
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">CR Dashboard</h2>
+      <span class="badge badge-blue">Admin</span>
+    </div>
+    <div class="dash-stats">
+      <div class="stat-card"><div class="stat-num" style="color:var(--amber)" id="statPending">0</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)" id="statApproved">3</div><div class="stat-label">Approved</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--red)" id="statRejected">0</div><div class="stat-label">Rejected</div></div>
+      <div class="stat-card"><div class="stat-num" id="statTotal">3</div><div class="stat-label">Total</div></div>
+    </div>
+    <div class="tabs" style="margin-bottom:24px">
+      <button class="tab active" onclick="switchAdminTab('pending',this)">Pending <span class="chip" id="adminPendingChip">0</span></button>
+      <button class="tab" onclick="switchAdminTab('approved',this)">Approved</button>
+      <button class="tab" onclick="switchAdminTab('rejected',this)">Rejected</button>
+    </div>
+    <div id="adminList"></div>
+  </section>
+</div>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="overlay" style="display:none" onclick="closeLogin()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">CR Login</div>
+    <div class="modal-sub">Only the Class Representative can access the admin panel.</div>
+    <div style="margin-bottom:14px">
+      <label class="form-label">Email</label>
+      <input class="form-input" id="loginEmail" type="email" placeholder="Enter your email">
+    </div>
+    <div style="margin-bottom:20px">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="loginPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In →</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeLogin()">Cancel</button>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" class="lightbox" style="display:none" onclick="closeLightbox()">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lb-info">
+    <strong id="lightboxTitle"></strong>
+    <p id="lightboxDesc" style="opacity:.8;font-size:.85rem;margin-top:4px"></p>
+    <a id="lightboxDownload" href="" download target="_blank" rel="noreferrer">
+      <button class="btn btn-outline btn-sm" style="margin-top:12px;color:white;border-color:rgba(255,255,255,.4)">⬇ Download</button>
+    </a>
+  </div>
+</div>
+
+<!-- API KEY MODAL -->
+<div id="apiKeyModal" class="overlay" style="display:none" onclick="closeApiKeyModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <div style="font-size:2rem;margin-bottom:8px">🤖</div>
+    <div class="modal-title">AI Verification Setup</div>
+    <div class="modal-sub">Enter your free Google Gemini API key to enable automatic question paper detection.</div>
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;margin-bottom:18px;font-size:.82rem;color:#166534;line-height:1.6">
+      <strong>✅ How to get FREE Gemini API key:</strong><br>
+      1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#15803d;font-weight:600">aistudio.google.com/apikey</a><br>
+      2. Sign in with Google account<br>
+      3. Click <strong>"Create API Key"</strong> → Copy it<br>
+      4. Paste below — it's completely <strong>FREE!</strong>
+    </div>
+    <div style="margin-bottom:18px">
+      <label class="form-label">Google Gemini API Key</label>
+      <input class="form-input" id="apiKeyInput" type="password" placeholder="AIza..." autocomplete="off">
+      <div style="font-size:.75rem;color:var(--muted);margin-top:6px">Get your free key at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--blue)">aistudio.google.com/apikey</a></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveApiKey()">✅ Save & Activate</button>
+      <button class="btn btn-outline btn-sm" onclick="clearApiKey()">🗑 Clear</button>
+    </div>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeApiKeyModal()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ─── SEMESTER & SUBJECT DATA ─────────────────────────────────
+const SEMESTERS = {
+  S03: { icon:'⚗️', credits:20, sgpi:'8.45', sgpiTotal:169, subjects:[
+    {n:'Computational Lab',t:'lab'},
+    {n:'Chemical Process Calculations',t:'theory'},
+    {n:'Fluid Mechanics Lab',t:'lab'},
+    {n:'Numerical Methods in Chemical Engineering',t:'theory'},
+    {n:'Chemical Engineering Thermodynamics-I',t:'theory'},
+    {n:'Fluid Mechanics',t:'theory'},
+    {n:'Mechanical Operation',t:'theory'},
+    {n:'Mechanical Operation Lab',t:'lab'},
+  ]},
+  S04: { icon:'🔥', credits:null, sgpi:null, subjects:[
+    {n:'Chemical Technology',t:'theory'},
+    {n:'Process Equipment Design-I',t:'theory'},
+    {n:'Sports Activities',t:'activity'},
+    {n:'Energy Resources & Utilization',t:'theory'},
+    {n:'Chemical Engineering Thermodynamics-II',t:'theory'},
+    {n:'Thermodynamics Lab',t:'lab'},
+    {n:'Heat Transfer Lab',t:'lab'},
+    {n:'Heat Transfer',t:'theory'},
+    {n:'Chemical Technology Lab',t:'lab'},
+  ]},
+  S05: { icon:'⚙️', credits:null, sgpi:null, subjects:[
+    {n:'Chemical Reaction Engineering Lab',t:'lab'},
+    {n:'Fluidization Technology',t:'theory'},
+    {n:'Chemical Reaction Engineering-I',t:'theory'},
+    {n:'Engineering Economics and Accountancy',t:'theory'},
+    {n:'Mass Transfer-I',t:'theory'},
+    {n:'Disaster Management',t:'theory'},
+    {n:'Process Dynamics & Control Lab',t:'lab'},
+    {n:'Process Dynamics & Control',t:'theory'},
+  ]}
+};
+
+// ─── PAPERS DATABASE ─────────────────────────────────────────
+const papersDB = {
+  'Chemical Engineering Thermodynamics-I': [
+    {id:1, title:'2024 End Sem Paper', uploader:'Naveen Kumar', date:'Mar 10, 2026', status:'approved', img:'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&q=80'},
+    {id:2, title:'2023 Mid Sem Paper', uploader:'Priya Sharma', date:'Mar 8, 2026', status:'approved', img:'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=600&q=80'},
+  ],
+  'Fluid Mechanics': [
+    {id:3, title:'2024 End Sem Paper', uploader:'Rahul Mehta', date:'Mar 6, 2026', status:'approved', img:'https://images.unsplash.com/photo-1532094349884-543559c1d7b4?w=600&q=80'},
+  ],
+  'Heat Transfer': [
+    {id:4, title:'2023 End Sem Paper', uploader:'Ananya Singh', date:'Mar 4, 2026', status:'approved', img:'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80'},
+  ],
+};
+
+// ─── STATE ────────────────────────────────────────────────────
+const state = {
+  isAdmin: false,
+  activeSem: 'S03',
+  currentSubject: null,
+  currentSubjectType: null,
+  currentSubjectSem: null,
+  selectedFile: null,
+  selectedFileDataUrl: null,
+  myUploads: [],
+  nextId: 200,
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────
+function getPapers(name) { return papersDB[name] || []; }
+function getApproved(name) { return getPapers(name).filter(p=>p.status==='approved'); }
+function getPending() { return Object.values(papersDB).flat().filter(p=>p.status==='pending'); }
+function getRejected() { return Object.values(papersDB).flat().filter(p=>p.status==='rejected'); }
+function getAllApproved() { return Object.values(papersDB).flat().filter(p=>p.status==='approved'); }
+function paperCount(name) { return getApproved(name).length; }
+
+// ─── PAGE NAVIGATION ─────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('#studentTabs .tab, #adminTabs .tab').forEach(t=>t.classList.remove('active'));
+  if (name==='subjects') {
+    document.querySelectorAll('#studentTabs .tab')[0]?.classList.add('active');
+    document.querySelectorAll('#adminTabs .tab')[0]?.classList.add('active');
+    initSubjects();
+  }
+  if (name==='myuploads') { document.querySelectorAll('#studentTabs .tab')[1]?.classList.add('active'); renderMyUploads(); }
+  if (name==='admin') { document.querySelectorAll('#adminTabs .tab')[1]?.classList.add('active'); renderAdmin(); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── SUBJECTS PAGE ────────────────────────────────────────────
+function initSubjects() {
+  document.getElementById('semTabs').innerHTML = Object.entries(SEMESTERS).map(([sem,d])=>`
+    <button class="sem-tab ${sem===state.activeSem?'active':''}" onclick="switchSem('${sem}',this)">
+      ${d.icon} ${sem} <span class="s-count">${d.subjects.length}</span>
+    </button>`).join('');
+  renderSubjects(state.activeSem);
+}
+
+function switchSem(sem, el) {
+  state.activeSem = sem;
+  document.querySelectorAll('.sem-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderSubjects(sem);
+}
+
+function renderSubjects(sem) {
+  const d = SEMESTERS[sem];
+
+  const tagMap = {theory:['t-theory','Theory'],lab:['t-lab','Lab'],activity:['t-activity','Activity']};
+  document.getElementById('subjectGrid').innerHTML = d.subjects.map((s,i) => {
+    const [tc,tl] = tagMap[s.t]||tagMap.theory;
+    const count = paperCount(s.n);
+    return `
+    <div class="subj-card is-${s.t}" style="animation-delay:${i*.04}s" onclick="openSubject('${s.n.replace(/'/g,"\\'")}','${s.t}','${sem}')">
+      <div class="subj-num">${i+1}</div>
+      <div style="flex:1">
+        <div class="subj-name">${s.n}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+          <span class="subj-tag ${tc}">${tl}</span>
+          ${count>0
+            ? `<span class="subj-tag" style="background:#f0fdf4;color:#166534">${count} paper${count>1?'s':''}</span>`
+            : `<span style="font-size:.7rem;color:var(--muted)">No papers yet</span>`}
+        </div>
+      </div>
+      <span style="color:#9ca3af">→</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── SUBJECT PAPERS PAGE ──────────────────────────────────────
+function openSubject(name, type, sem) {
+  state.currentSubject = name;
+  state.currentSubjectType = type;
+  state.currentSubjectSem = sem;
+  state.selectedFile = null;
+  state.selectedFileDataUrl = null;
+
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-papers').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  const tagMap = {theory:['t-theory','Theory'],lab:['t-lab','Lab'],activity:['t-activity','Activity']};
+  const [tc,tl] = tagMap[type]||tagMap.theory;
+  const approved = getApproved(name);
+  const pending = getPapers(name).filter(p=>p.status==='pending');
+
+  document.getElementById('papersHeader').innerHTML = `
+    <div class="papers-header">
+      <div class="papers-subject-name">${name}</div>
+      <div class="papers-meta">
+        <span class="subj-tag ${tc}" style="display:inline-block">${tl}</span>
+        <span>📚 ${sem}</span>
+        <span>✅ ${approved.length} paper${approved.length!==1?'s':''} available</span>
+        ${pending.length?`<span>⏳ ${pending.length} pending</span>`:''}
+      </div>
+    </div>`;
+
+  renderUploadZone();
+  renderPapersGallery(name);
+}
+
+function renderUploadZone() {
+  document.getElementById('papersUploadZone').innerHTML = `
+    <div class="inline-upload" id="inlineUploadZone"
+      onclick="document.getElementById('paperFileInput').click()"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handlePaperDrop(event)">
+      <span style="font-size:2rem;display:block;margin-bottom:8px">📄</span>
+      <h3>Upload Previous Year Paper</h3>
+      <p>Drag & drop a photo of the paper, or click to select</p>
+      <input type="file" id="paperFileInput" accept="image/*" style="display:none" onchange="handlePaperFileSelect(event)">
+    </div>
+    <div id="paperPreviewWrap" style="display:none" class="inline-upload" onclick="">
+      <div class="preview-wrap">
+        <img id="paperPreviewImg" src="" alt="">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:.88rem" id="paperFileName"></div>
+          <div style="font-size:.78rem;color:var(--muted)">Ready to upload</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="clearPaperFile(event)">✕</button>
+      </div>
+      <div class="inline-form">
+        <div><label class="form-label">Paper Title *</label><input class="form-input" id="paperTitle" placeholder="e.g. 2024 End Sem Paper"></div>
+        <div><label class="form-label">Your Name</label><input class="form-input" id="paperUploader" placeholder="e.g. Naveen Kumar"></div>
+        <button class="btn btn-primary" onclick="submitPaper(event)" id="paperSubmitBtn" style="align-self:flex-end">📤 Submit</button>
+      </div>
+      <div id="paperProgress" style="display:none" class="inline-progress"><div class="inline-progress-fill" id="paperProgressFill" style="width:0%"></div></div>
+    </div>`;
+}
+
+function handlePaperDrop(e) {
+  e.preventDefault(); e.stopPropagation();
+  document.getElementById('inlineUploadZone').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) setPaperFile(f);
+}
+function handlePaperFileSelect(e) { const f=e.target.files[0]; if(f) setPaperFile(f); }
+function setPaperFile(f) {
+  state.selectedFile = f;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    state.selectedFileDataUrl = ev.target.result;
+    document.getElementById('paperPreviewImg').src = ev.target.result;
+    document.getElementById('paperFileName').textContent = f.name;
+    document.getElementById('inlineUploadZone').style.display = 'none';
+    document.getElementById('paperPreviewWrap').style.display = 'block';
+  };
+  reader.readAsDataURL(f);
+}
+function clearPaperFile(e) {
+  e && e.stopPropagation();
+  state.selectedFile = null; state.selectedFileDataUrl = null;
+  document.getElementById('inlineUploadZone').style.display = 'block';
+  document.getElementById('paperPreviewWrap').style.display = 'none';
+  const fi = document.getElementById('paperFileInput');
+  if (fi) fi.value = '';
+}
+
+async function submitPaper(e) {
+  e.stopPropagation();
+  const title = document.getElementById('paperTitle').value.trim();
+  const uploader = document.getElementById('paperUploader').value.trim() || 'Anonymous';
+  if (!state.selectedFile || !title) { showToast('Please select a file and add a title.','error'); return; }
+
+  const btn = document.getElementById('paperSubmitBtn');
+  const progressBar = document.getElementById('paperProgress');
+  const progressFill = document.getElementById('paperProgressFill');
+
+  btn.disabled = true;
+  progressBar.style.display = 'block';
+
+  // Step 1: Show scanning animation
+  btn.innerHTML = '🤖 AI Scanning…';
+  progressFill.style.background = '#6366f1';
+  progressFill.style.width = '30%';
+
+  // Show AI scanning overlay on preview image
+  document.getElementById('paperPreviewWrap').style.position = 'relative';
+
+  try {
+    // Step 2: Send image to Claude AI for verification
+    const base64 = state.selectedFileDataUrl.split(',')[1];
+    const mediaType = state.selectedFile.type || 'image/jpeg';
+
+    progressFill.style.width = '55%';
+    btn.innerHTML = '🤖 Analysing image…';
+
+    if (!ANTHROPIC_API_KEY) {
+      showApiKeyModal();
+      btn.disabled = false; btn.innerHTML = '📤 Submit';
+      progressBar.style.display = 'none';
+      showToast('⚠️ Please set your Gemini API key first.', 'error');
+      return;
+    }
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${ANTHROPIC_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            {
+              inline_data: { mime_type: mediaType, data: base64 }
+            },
+            {
+              text: `You are a strict academic paper validator for an NIT (National Institute of Technology) college paper repository.
+
+Analyze this image and determine if it is a genuine university/college question paper or study material.
+
+A VALID paper must have AT LEAST 2 of these:
+- Questions with numbers or marks allocated
+- Subject name or course code
+- Exam instructions (time limit, max marks, attempt all, etc.)
+- University/college name or logo
+- Handwritten or printed academic notes/study material
+
+An INVALID upload includes:
+- Memes, jokes, or funny images
+- Personal photos or selfies
+- Random screenshots or social media posts
+- Unrelated images (food, nature, people, etc.)
+- Blank or near-blank images
+
+Respond ONLY with valid JSON, no extra text:
+{"valid": true/false, "reason": "one short sentence explanation", "confidence": "high/medium/low"}`
+            }
+          ]
+        }],
+        generationConfig: { maxOutputTokens: 300 }
+      })
+    });
+
+    progressFill.style.width = '80%';
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let result;
+    try {
+      result = JSON.parse(text.replace(/```json|```/g,'').trim());
+    } catch {
+      // If parsing fails, default to pending
+      result = { valid: null, reason: 'Could not analyse image', confidence: 'low' };
+    }
+
+    progressFill.style.width = '100%';
+    await new Promise(r => setTimeout(r, 400));
+
+    const dateStr = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+
+    if (result.valid === false && result.confidence !== 'low') {
+      // AI is confident this is NOT a question paper — auto reject
+      const paper = { id:state.nextId++, title, uploader, date:dateStr, status:'rejected',
+        img:state.selectedFileDataUrl, aiReason: result.reason };
+      if (!papersDB[state.currentSubject]) papersDB[state.currentSubject] = [];
+      papersDB[state.currentSubject].push(paper);
+      state.myUploads.push({...paper, subjectName:state.currentSubject});
+
+      showAIResult(false, result.reason);
+    } else if (result.valid === true && result.confidence === 'high') {
+      // AI is confident this IS a question paper — auto approve!
+      const paper = { id:state.nextId++, title, uploader, date:dateStr, status:'approved',
+        img:state.selectedFileDataUrl, aiReason: result.reason };
+      if (!papersDB[state.currentSubject]) papersDB[state.currentSubject] = [];
+      papersDB[state.currentSubject].push(paper);
+      state.myUploads.push({...paper, subjectName:state.currentSubject});
+
+      showAIResult(true, result.reason);
+    } else {
+      // AI is unsure — send to CR for manual review
+      const paper = { id:state.nextId++, title, uploader, date:dateStr, status:'pending',
+        img:state.selectedFileDataUrl, aiReason: result.reason };
+      if (!papersDB[state.currentSubject]) papersDB[state.currentSubject] = [];
+      papersDB[state.currentSubject].push(paper);
+      state.myUploads.push({...paper, subjectName:state.currentSubject});
+
+      showAIResult(null, result.reason);
+    }
+
+    updateAdminChip();
+    clearPaperFile(null);
+    renderPapersGallery(state.currentSubject);
+    renderSubjects(state.activeSem);
+    openSubject(state.currentSubject, state.currentSubjectType, state.currentSubjectSem);
+
+  } catch (err) {
+    // Network error — fallback to pending
+    const dateStr = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    const paper = { id:state.nextId++, title, uploader, date:dateStr, status:'pending', img:state.selectedFileDataUrl };
+    if (!papersDB[state.currentSubject]) papersDB[state.currentSubject] = [];
+    papersDB[state.currentSubject].push(paper);
+    state.myUploads.push({...paper, subjectName:state.currentSubject});
+    updateAdminChip();
+    clearPaperFile(null);
+    renderPapersGallery(state.currentSubject);
+    renderSubjects(state.activeSem);
+    openSubject(state.currentSubject, state.currentSubjectType, state.currentSubjectSem);
+    showToast('📤 Submitted! Sent for CR review.','success');
+  }
+
+  btn.disabled = false; btn.innerHTML = '📤 Submit';
+  progressBar.style.display = 'none';
+  progressFill.style.width = '0%';
+  progressFill.style.background = 'var(--blue)';
+}
+
+function showAIResult(valid, reason) {
+  if (valid === true) {
+    showToast('✅ AI verified! Paper auto-approved and published.', 'success');
+  } else if (valid === false) {
+    showToast('❌ AI rejected: ' + reason, 'error');
+  } else {
+    showToast('🤖 AI unsure — sent to CR for manual review.', 'default');
+  }
+}
+
+function renderPapersGallery(name) {
+  const papers = getPapers(name);
+  const el = document.getElementById('papersGallery');
+  if (!papers.length) {
+    el.innerHTML = `<div class="empty"><span class="empty-icon">📭</span><strong>No papers yet</strong><p style="margin-top:6px">Be the first to upload!</p></div>`;
+    return;
+  }
+  const approved = papers.filter(p=>p.status==='approved');
+  const pending = papers.filter(p=>p.status==='pending');
+  let html = '';
+  if (approved.length) html += `
+    <div style="margin-bottom:28px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:16px">✅ Approved Papers <span style="font-size:.82rem;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400">${approved.length} available</span></h3>
+      <div class="papers-grid">${approved.map(p=>paperCardHTML(p,true)).join('')}</div>
+    </div>`;
+  if (pending.length) html += `
+    <div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:16px">⏳ Pending Approval <span style="font-size:.82rem;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400">${pending.length} waiting</span></h3>
+      <div class="papers-grid">${pending.map(p=>paperCardHTML(p,false)).join('')}</div>
+    </div>`;
+  el.innerHTML = html;
+}
+
+function paperCardHTML(p, isApproved) {
+  const imgSafe = p.img.replace(/'/g,"\\'");
+  const titleSafe = p.title.replace(/'/g,"\\'");
+  return `
+  <div class="paper-card ${!isApproved?'':''}">
+    <div class="paper-img">
+      <img src="${p.img}" alt="${p.title}" ${isApproved?`onclick="openLightbox('${imgSafe}','${titleSafe}','by ${p.uploader}')" style="cursor:pointer"`:''}>
+      ${!isApproved?`<div class="pending-overlay"><span style="color:white;font-weight:600;font-size:.82rem;background:rgba(0,0,0,.55);padding:6px 12px;border-radius:20px">⏳ Pending Review</span></div>`:''}
+    </div>
+    <div class="paper-body">
+      <div class="paper-title">${p.title}</div>
+      <div class="paper-sub">by ${p.uploader} · ${p.date}</div>
+      <div class="paper-actions">
+        ${isApproved ? `
+          <button class="btn btn-outline btn-sm" onclick="openLightbox('${imgSafe}','${titleSafe}','')">🔍 View</button>
+          <a href="${p.img}" download target="_blank" rel="noreferrer"><button class="btn btn-blue btn-sm">⬇ Download</button></a>
+        ` : `<span class="status status-pending"><span class="status-dot"></span>Awaiting CR approval</span>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── MY UPLOADS ───────────────────────────────────────────────
+function renderMyUploads() {
+  const el = document.getElementById('myUploadsList');
+  if (!state.myUploads.length) {
+    el.innerHTML = `<div class="empty"><span class="empty-icon">📭</span><strong>No uploads yet</strong><p style="margin-top:6px">Go to a subject and upload a previous year paper.</p></div>`;
+    return;
+  }
+  el.innerHTML = state.myUploads.map(p=>`
+    <div class="my-item">
+      <img class="my-thumb" src="${p.img}" alt="${p.title}" onclick="openLightbox('${p.img}','${p.title}','')">
+      <div class="my-info">
+        <div class="my-title">${p.title}</div>
+        <div style="color:var(--muted);font-size:.78rem;margin:2px 0">${p.subjectName}</div>
+        <div class="my-time">${p.date}</div>
+      </div>
+      ${statusBadge(p.status)}
+    </div>`).join('');
+}
+
+function statusBadge(s) {
+  const map = {pending:['status-pending','⏳ Pending'],approved:['status-approved','✅ Approved'],rejected:['status-rejected','❌ Rejected']};
+  const [cls,label] = map[s]||map.pending;
+  return `<span class="status ${cls}"><span class="status-dot"></span>${label}</span>`;
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────
+let adminTabState = 'pending';
+function switchAdminTab(tab, el) {
+  adminTabState = tab;
+  document.querySelectorAll('#page-admin .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderAdmin();
+}
+
+function renderAdmin() {
+  const pending=getPending(), approved=getAllApproved(), rejected=getRejected();
+  document.getElementById('statPending').textContent = pending.length;
+  document.getElementById('statApproved').textContent = approved.length;
+  document.getElementById('statRejected').textContent = rejected.length;
+  document.getElementById('statTotal').textContent = pending.length+approved.length+rejected.length;
+  updateAdminChip();
+
+  const list = adminTabState==='pending'?pending:adminTabState==='approved'?approved:rejected;
+  const el = document.getElementById('adminList');
+  if (!list.length) { el.innerHTML=`<div class="empty"><span class="empty-icon">🎉</span><strong>Nothing here</strong><p style="margin-top:6px">No ${adminTabState} papers.</p></div>`; return; }
+  el.innerHTML = list.map(p=>`
+    <div class="pending-item">
+      <img class="pending-thumb" src="${p.img}" alt="${p.title}">
+      <div class="pending-body">
+        <div>
+          <div class="pending-title">${p.title}</div>
+          <div class="pending-meta">by ${p.uploader} · ${p.date}</div>
+        </div>
+        <div class="pending-actions">
+          ${adminTabState==='pending'?`
+            <button class="btn btn-green btn-sm" onclick="approveP(${p.id})">✅ Approve</button>
+            <button class="btn btn-red btn-sm" onclick="rejectP(${p.id})">❌ Reject</button>`:''}
+          ${adminTabState==='approved'?`${statusBadge('approved')}<button class="btn btn-red btn-sm" onclick="deleteP(${p.id})">🗑 Delete</button>`:''}
+          ${adminTabState==='rejected'?`${statusBadge('rejected')}<button class="btn btn-outline btn-sm" onclick="approveP(${p.id})">↩ Restore</button><button class="btn btn-red btn-sm" onclick="deleteP(${p.id})">🗑 Delete</button>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function findPaper(id) { for(const papers of Object.values(papersDB)){const p=papers.find(x=>x.id===id);if(p)return p;} return null; }
+
+function approveP(id) {
+  const p=findPaper(id); if(!p)return;
+  p.status='approved';
+  const mu=state.myUploads.find(x=>x.id===id); if(mu)mu.status='approved';
+  renderAdmin(); updateAdminChip();
+  if(state.currentSubject)renderPapersGallery(state.currentSubject);
+  showToast('✅ Paper approved and published!','success');
+}
+function rejectP(id) {
+  const p=findPaper(id); if(!p)return;
+  p.status='rejected';
+  const mu=state.myUploads.find(x=>x.id===id); if(mu)mu.status='rejected';
+  renderAdmin(); updateAdminChip();
+  if(state.currentSubject)renderPapersGallery(state.currentSubject);
+  showToast('Paper rejected.','error');
+}
+function deleteP(id) {
+  if (!confirm('Are you sure you want to permanently delete this paper?')) return;
+  for (const key of Object.keys(papersDB)) {
+    const idx = papersDB[key].findIndex(x => x.id === id);
+    if (idx !== -1) { papersDB[key].splice(idx, 1); break; }
+  }
+  const muIdx = state.myUploads.findIndex(x => x.id === id);
+  if (muIdx !== -1) state.myUploads.splice(muIdx, 1);
+  renderAdmin(); updateAdminChip();
+  if (state.currentSubject) renderPapersGallery(state.currentSubject);
+  showToast('🗑 Paper deleted permanently.', 'error');
+}
+function updateAdminChip() {
+  const c=getPending().length;
+  document.getElementById('pendingChip').textContent=c;
+  document.getElementById('adminPendingChip').textContent=c;
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────
+function openLogin(){document.getElementById('loginModal').style.display='flex';setTimeout(()=>document.getElementById('loginEmail').focus(),100);}
+function closeLogin(){document.getElementById('loginModal').style.display='none';}
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pw=document.getElementById('loginPassword').value;
+  if(email==='cr.nitchemical@gmail.com'&&pw==='NITCH@CR2024'){
+    state.isAdmin=true;
+    document.getElementById('studentTabs').style.display='none';
+    document.getElementById('adminTabs').style.display='flex';
+    document.getElementById('loginBtn').style.display='none';
+    document.getElementById('logoutBtn').style.display='block';
+    document.getElementById('aiSetupBtn').style.display='flex';
+    closeLogin(); showToast('👋 Welcome, CR!','success'); showPage('admin');
+  } else { showToast('❌ Invalid email or password.','error'); }
+}
+function doLogout(){
+  state.isAdmin=false;
+  document.getElementById('studentTabs').style.display='flex';
+  document.getElementById('adminTabs').style.display='none';
+  document.getElementById('loginBtn').style.display='block';
+  document.getElementById('logoutBtn').style.display='none';
+  document.getElementById('aiSetupBtn').style.display='none';
+  showPage('subjects'); showToast('Signed out.','default');
+}
+
+// ─── LIGHTBOX ─────────────────────────────────────────────────
+function openLightbox(url,title,desc){
+  document.getElementById('lightboxImg').src=url;
+  document.getElementById('lightboxTitle').textContent=title;
+  document.getElementById('lightboxDesc').textContent=desc;
+  document.getElementById('lightboxDownload').href=url;
+  document.getElementById('lightbox').style.display='flex';
+}
+function closeLightbox(){document.getElementById('lightbox').style.display='none';}
+
+// ─── TOAST ────────────────────────────────────────────────────
+function showToast(msg,type='default'){
+  const w=document.getElementById('toastWrap');
+  const t=document.createElement('div');
+  t.className=`toast toast-${type}`; t.textContent=msg;
+  w.appendChild(t); setTimeout(()=>t.remove(),3500);
+}
+
+// ─── API KEY SETUP ────────────────────────────────────────────
+let ANTHROPIC_API_KEY = '';
+
+function showApiKeyModal() {
+  document.getElementById('apiKeyModal').style.display = 'flex';
+  setTimeout(()=>document.getElementById('apiKeyInput').focus(), 100);
+}
+function closeApiKeyModal() {
+  document.getElementById('apiKeyModal').style.display = 'none';
+}
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('AIza')) {
+    showToast('❌ Invalid Gemini API key. Should start with AIza...', 'error');
+    return;
+  }
+  ANTHROPIC_API_KEY = key;
+  localStorage.setItem('nit_paperhub_apikey', key);
+  closeApiKeyModal();
+  showToast('✅ Gemini API key saved! AI verification is now active.', 'success');
+  updateApiKeyStatus();
+}
+function clearApiKey() {
+  ANTHROPIC_API_KEY = '';
+  localStorage.removeItem('nit_paperhub_apikey');
+  document.getElementById('apiKeyInput').value = '';
+  showToast('API key cleared.', 'default');
+  updateApiKeyStatus();
+}
+function updateApiKeyStatus() {
+  const dot = document.getElementById('aiStatusDot');
+  const label = document.getElementById('aiStatusLabel');
+  if (ANTHROPIC_API_KEY) {
+    dot.style.background = '#059669';
+    label.textContent = 'AI Active';
+    label.style.color = '#059669';
+  } else {
+    dot.style.background = '#d97706';
+    label.textContent = 'AI Setup Needed';
+    label.style.color = '#d97706';
+  }
+}
+
+// Load saved key on startup
+(function loadSavedKey() {
+  const saved = localStorage.getItem('nit_paperhub_apikey');
+  if (saved) { ANTHROPIC_API_KEY = saved; }
+})();
+
+// INIT
+initSubjects();
+updateApiKeyStatus();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLightbox();closeLogin();closeApiKeyModal();}});
+</script>
+</body>
+</html>
