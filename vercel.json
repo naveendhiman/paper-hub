@@ -1,1 +1,18 @@
-
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "public": true,
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x",
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_SECRET": "@jwt_secret",
+    "API_BASE_URL": "@api_base_url",
+    "ALLOWED_ORIGINS": "@allowed_origins"
+  }
+}
