@@ -11,7 +11,7 @@
      ══════════════════════════════════════════════════════════ -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
 
 <style>
 :root {
@@ -187,10 +187,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
     </div>
     <button class="btn btn-ghost btn-sm" id="loginBtn" onclick="openLogin()">CR Login</button>
     <button class="btn btn-ghost btn-sm" id="logoutBtn" onclick="doLogout()" style="display:none">Sign Out</button>
-    <button class="btn btn-outline btn-sm" id="aiSetupBtn" onclick="showApiKeyModal()" style="gap:6px;padding:7px 12px;display:none;">
-      <span id="aiStatusDot" style="width:8px;height:8px;border-radius:50%;background:#d97706;display:inline-block;flex-shrink:0"></span>
-      <span id="aiStatusLabel" style="font-size:.78rem;color:#d97706">AI Setup</span>
-    </button>
+
   </div>
 </header>
 
@@ -273,29 +270,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
   </div>
 </div>
 
-<!-- AI / GEMINI KEY MODAL -->
-<div id="apiKeyModal" class="overlay" style="display:none" onclick="closeApiKeyModal()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
-    <div style="font-size:2rem;margin-bottom:8px">🤖</div>
-    <div class="modal-title">AI Verification Setup</div>
-    <div class="modal-sub">Enter your free Google Gemini API key to enable automatic question paper detection.</div>
-    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;margin-bottom:18px;font-size:.82rem;color:#166534;line-height:1.6">
-      <strong>✅ Get FREE Gemini API key:</strong><br>
-      1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#15803d;font-weight:600">aistudio.google.com/apikey</a><br>
-      2. Sign in with Google → Click <strong>"Create API Key"</strong><br>
-      3. Paste it below — completely FREE!
-    </div>
-    <div style="margin-bottom:18px">
-      <label class="form-label">Google Gemini API Key</label>
-      <input class="form-input" id="apiKeyInput" type="password" placeholder="AIza..." autocomplete="off">
-    </div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-primary" style="flex:1" onclick="saveApiKey()">✅ Save & Activate</button>
-      <button class="btn btn-outline btn-sm" onclick="clearApiKey()">🗑 Clear</button>
-    </div>
-    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeApiKeyModal()">Cancel</button>
-  </div>
-</div>
+
 
 <div class="toast-wrap" id="toastWrap"></div>
 
@@ -312,12 +287,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
    STEP 6 › Build → Storage → Get started → Start in test mode
    ══════════════════════════════════════════════════════════════════ */
 const FIREBASE_CONFIG = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+  apiKey:            "AIzaSyANYvb1zTyDLcmFBdCp5cb_1FftJz0IwC4",
+  authDomain:        "paper-hub-5eafc.firebaseapp.com",
+  projectId:         "paper-hub-5eafc",
+  storageBucket:     "paper-hub-5eafc.firebasestorage.app",
+  messagingSenderId: "655461807810",
+  appId:             "1:655461807810:web:9e991d83b6b3bb4eab6d5b",
+  measurementId:     "G-FMC0PW7FVD"
 };
 
 // ─── SUBJECT DATA ─────────────────────────────────────────────
@@ -356,7 +332,7 @@ const SEMESTERS = {
 };
 
 // ─── RUNTIME STATE ────────────────────────────────────────────
-let db = null, storage = null, firebaseReady = false;
+let db = null, firebaseReady = false;
 let papersDB = {};   // { subjectName: [paperObj, …] }
 const state = {
   isAdmin: false, activeSem: 'S03',
@@ -372,8 +348,7 @@ function initFirebase() {
       return false;
     }
     firebase.initializeApp(FIREBASE_CONFIG);
-    db      = firebase.firestore();
-    storage = firebase.storage();
+    db = firebase.firestore();
     firebaseReady = true;
     return true;
   } catch(e) { console.error('Firebase init:', e); return false; }
@@ -427,33 +402,20 @@ async function fbUpdateStatus(id, status) {
 async function fbDelete(id) {
   for (const key of Object.keys(papersDB)) {
     const idx = papersDB[key].findIndex(x=>x.id===id);
-    if (idx !== -1) {
-      const p = papersDB[key][idx];
-      if (firebaseReady && p.storagePath) {
-        try { await storage.ref(p.storagePath).delete(); } catch(e){}
-      }
-      papersDB[key].splice(idx,1); break;
-    }
+    if (idx !== -1) { papersDB[key].splice(idx,1); break; }
   }
   if (!firebaseReady) { lsSave(); return; }
   try { await db.collection('papers').doc(id).delete(); } catch(e){ console.error(e); }
 }
 
-async function uploadImage(file, subjectName) {
-  if (!firebaseReady) {
-    // Fallback: return base64 data URL (stored in localStorage)
-    return new Promise((res,rej)=>{
-      const r=new FileReader();
-      r.onload=e=>res({url:e.target.result,path:null});
-      r.onerror=rej; r.readAsDataURL(file);
-    });
-  }
-  const ext = file.name.split('.').pop();
-  const path = `papers/${subjectName.replace(/\s/g,'_')}/${Date.now()}.${ext}`;
-  const ref = storage.ref(path);
-  const snap = await ref.put(file);
-  const url = await snap.ref.getDownloadURL();
-  return { url, path };
+async function uploadImage(file) {
+  // Store as base64 directly — no Firebase Storage needed (stays free!)
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res({ url: e.target.result, path: null });
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────
@@ -620,44 +582,18 @@ async function submitPaper(e){
   btn.disabled=true; prog.style.display='block'; setProgress(10,'Preparing…');
 
   const dateStr=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-  let aiStatus='pending', aiReason='';
 
   try {
-    // ── AI scan (optional) ──
-    if(GEMINI_KEY){
-      btn.innerHTML='🤖 AI Scanning…'; setProgress(25,'AI analysing image…','#6366f1');
-      try{
-        const b64=state.selectedFileDataUrl.split(',')[1];
-        const mime=state.selectedFile.type||'image/jpeg';
-        const aiR=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({contents:[{parts:[
-            {inline_data:{mime_type:mime,data:b64}},
-            {text:`Validate if this image is a genuine college/university question paper or academic study material.
-VALID: has questions with marks, subject name, exam instructions, or academic content.
-INVALID: memes, selfies, screenshots, food, nature, blank images.
-Reply ONLY with JSON: {"valid":true/false,"reason":"one sentence","confidence":"high/medium/low"}`}
-          ]}],generationConfig:{maxOutputTokens:150}})
-        });
-        const aiD=await aiR.json();
-        const aiTxt=aiD.candidates?.[0]?.content?.parts?.[0]?.text||'';
-        const aiRes=JSON.parse(aiTxt.replace(/```json|```/g,'').trim());
-        aiReason=aiRes.reason||'';
-        if(aiRes.valid===false&&aiRes.confidence!=='low') aiStatus='rejected';
-        else if(aiRes.valid===true&&aiRes.confidence==='high') aiStatus='approved';
-      }catch(aiErr){ console.warn('AI scan failed:',aiErr); }
-    }
-
     // ── Upload image ──
     btn.innerHTML='☁️ Uploading…'; setProgress(55,'Uploading image to storage…');
-    const {url:imgUrl, path:storagePath} = await uploadImage(state.selectedFile, state.currentSubject);
+    const {url:imgUrl, path:storagePath} = await uploadImage(state.selectedFile);
 
     // ── Save to Firestore / localStorage ──
     setProgress(85,'Saving…');
     const paper={
-      title, uploader, date:dateStr, status:aiStatus,
+      title, uploader, date:dateStr, status:'pending',
       img:imgUrl, storagePath:storagePath||null,
-      subjectName:state.currentSubject, subjectSem:state.currentSubjectSem, aiReason
+      subjectName:state.currentSubject, subjectSem:state.currentSubjectSem
     };
     const saved = await fbSave(paper);
     addSessionId(saved.id);
@@ -665,9 +601,7 @@ Reply ONLY with JSON: {"valid":true/false,"reason":"one sentence","confidence":"
     setProgress(100,'Done!','#059669');
     await new Promise(r=>setTimeout(r,500));
 
-    if(aiStatus==='approved') showToast('✅ AI verified! Paper published instantly.','success');
-    else if(aiStatus==='rejected') showToast('❌ AI rejected: '+aiReason,'error');
-    else showToast('📤 Submitted! Sent to CR for review.','default');
+    showToast('📤 Submitted! Sent to CR for review.','success');
 
     updateAdminChip(); clearFile(null);
     openSubject(state.currentSubject, state.currentSubjectType, state.currentSubjectSem);
@@ -748,7 +682,6 @@ function renderAdmin(){
       <div>
         <div class="pending-title">${p.title}</div>
         <div class="pending-meta">by ${p.uploader} · ${p.date} · ${p.subjectName}</div>
-        ${p.aiReason?`<div style="font-size:.75rem;color:var(--muted);margin-top:3px">🤖 ${p.aiReason}</div>`:''}
       </div>
       <div class="pending-actions">
         ${adminTab==='pending'?`<button class="btn btn-green btn-sm" onclick="approveP('${p.id}')">✅ Approve</button><button class="btn btn-red btn-sm" onclick="rejectP('${p.id}')">❌ Reject</button>`:''}
@@ -775,7 +708,6 @@ function doLogin(){
     document.getElementById('adminTabs').style.display='flex';
     document.getElementById('loginBtn').style.display='none';
     document.getElementById('logoutBtn').style.display='block';
-    document.getElementById('aiSetupBtn').style.display='flex';
     closeLogin(); showToast('👋 Welcome, CR!','success'); showPage('admin');
   } else showToast('❌ Invalid credentials.','error');
 }
@@ -785,7 +717,6 @@ function doLogout(){
   document.getElementById('adminTabs').style.display='none';
   document.getElementById('loginBtn').style.display='block';
   document.getElementById('logoutBtn').style.display='none';
-  document.getElementById('aiSetupBtn').style.display='none';
   showPage('subjects'); showToast('Signed out.','default');
 }
 
@@ -807,29 +738,11 @@ function showToast(msg,type='default'){
   w.appendChild(t); setTimeout(()=>t.remove(),3500);
 }
 
-// ─── GEMINI API KEY ───────────────────────────────────────────
-let GEMINI_KEY=localStorage.getItem('nit_paperhub_apikey')||'';
-function showApiKeyModal(){ document.getElementById('apiKeyModal').style.display='flex'; setTimeout(()=>document.getElementById('apiKeyInput').focus(),100); }
-function closeApiKeyModal(){ document.getElementById('apiKeyModal').style.display='none'; }
-function saveApiKey(){
-  const k=document.getElementById('apiKeyInput').value.trim();
-  if(!k.startsWith('AIza')){ showToast('❌ Invalid key — should start with AIza...','error'); return; }
-  GEMINI_KEY=k; localStorage.setItem('nit_paperhub_apikey',k);
-  closeApiKeyModal(); showToast('✅ Gemini AI activated!','success'); updateApiStatus();
-}
-function clearApiKey(){ GEMINI_KEY=''; localStorage.removeItem('nit_paperhub_apikey'); document.getElementById('apiKeyInput').value=''; showToast('Key cleared.','default'); updateApiStatus(); }
-function updateApiStatus(){
-  const dot=document.getElementById('aiStatusDot'),lbl=document.getElementById('aiStatusLabel');
-  if(GEMINI_KEY){ dot.style.background='#059669'; lbl.textContent='AI Active'; lbl.style.color='#059669'; }
-  else{ dot.style.background='#d97706'; lbl.textContent='AI Setup'; lbl.style.color='#d97706'; }
-}
-
 // ─── BOOT ─────────────────────────────────────────────────────
 async function boot(){
   initFirebase();
   await fbLoad();
   initSubjects();
-  updateApiStatus();
   updateAdminChip();
 }
 boot();
@@ -837,4 +750,3 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeLightbox(); 
 </script>
 </body>
 </html>
-
